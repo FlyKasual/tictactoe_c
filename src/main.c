@@ -7,8 +7,12 @@
 enum player {
     NONE = -1,
     X,
-    O,
-    draw
+    O
+};
+
+union gameState {
+    enum player winner;
+    enum { draw = 2, ongoing } state;
 };
 
 typedef enum player* game;
@@ -16,7 +20,7 @@ typedef enum player* game;
 void printGame(game);
 void printRow(game, int);
 int getAndValidateUserInput(game);
-enum player determineWinner(game, enum player);
+union gameState determineWinner(game, enum player);
 
 int main(void) {
     enum player currentPlayer = X;
@@ -25,19 +29,19 @@ int main(void) {
         NONE, NONE, NONE,
         NONE, NONE, NONE
     };
-    enum player gameState = NONE;
+    union gameState state = { ongoing };
 
     printGame(_game);
-    for (;gameState == NONE; gameState = determineWinner(_game, currentPlayer), currentPlayer = 1 - currentPlayer) {
+    for (;state.state == ongoing; state = determineWinner(_game, currentPlayer), currentPlayer = 1 - currentPlayer) {
         printf("It's %c's turn\n", currentPlayer == X ? 'X' : 'O');
         int choice = getAndValidateUserInput(_game);
         _game[choice] = currentPlayer;
         printGame(_game);
     }
-    if (gameState == draw)
+    if (state.state == draw)
         printf("It's adraw!\n");
     else
-        printf("%c has won!\n", gameState == X ? 'X' : 'O');
+        printf("%c has won!\n", state.winner == X ? 'X' : 'O');
     return EXIT_SUCCESS;
 }
 
@@ -79,31 +83,33 @@ int getAndValidateUserInput(game _game) {
     return _i - 1;
 }
 
-enum player determineWinner(game _game, enum player currentPlayer) {
+union gameState determineWinner(game _game, enum player currentPlayer) {
     int numberOfFreeFields = 0;
+    union gameState state = { ongoing };
     for (int i = 0; i < SIZE; ++i) {
         if (_game[i] == NONE)
             ++numberOfFreeFields;
     }
-    if (numberOfFreeFields < 5) {
-        if (_game[0] == currentPlayer && _game[1] == currentPlayer && _game[2] == currentPlayer)
-            return currentPlayer;
-        if (_game[0] == currentPlayer && _game[3] == currentPlayer && _game[6] == currentPlayer)
-            return currentPlayer;
-        if (_game[6] == currentPlayer && _game[7] == currentPlayer && _game[8] == currentPlayer)
-            return currentPlayer;
-        if (_game[2] == currentPlayer && _game[5] == currentPlayer && _game[8] == currentPlayer)
-            return currentPlayer;
-        if (_game[4] == currentPlayer) {
+    if (numberOfFreeFields < 5) {   // If 5 or more fields are still unset, no player has made more than 2 moves
+        if (
+            (_game[0] == currentPlayer && _game[1] == currentPlayer && _game[2] == currentPlayer)       // First row
+            || (_game[0] == currentPlayer && _game[3] == currentPlayer && _game[6] == currentPlayer)    // First column
+            || (_game[6] == currentPlayer && _game[7] == currentPlayer && _game[8] == currentPlayer)    // Last row
+            || (_game[2] == currentPlayer && _game[5] == currentPlayer && _game[8] == currentPlayer)    // Last column
+        )
+            state.winner = currentPlayer;
+        if (_game[4] == currentPlayer) {    // Player has the center
             if (
-                (_game[0] == currentPlayer && _game[8] == currentPlayer)
-                || (_game[2] == currentPlayer && _game[6] == currentPlayer)
-                || (_game[3] == currentPlayer && _game[5] == currentPlayer)
-                || (_game[1] == currentPlayer && _game[7] == currentPlayer)
+                (_game[0] == currentPlayer && _game[8] == currentPlayer)        // Top left to bottom right diagonal
+                || (_game[2] == currentPlayer && _game[6] == currentPlayer)     // Top right to bottom left diagonal
+                || (_game[3] == currentPlayer && _game[5] == currentPlayer)     // Center row
+                || (_game[1] == currentPlayer && _game[7] == currentPlayer)     // center column
             ) {
-                return currentPlayer;
+                state.winner = currentPlayer;
             }
         }
     }
-    return numberOfFreeFields == 0 ? draw : NONE;
+    if (numberOfFreeFields == 0)
+        state.state = draw;
+    return state;
 }
