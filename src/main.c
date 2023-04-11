@@ -21,6 +21,7 @@ void printGame(game);
 void printRow(game, int);
 int getAndValidateUserInput(game);
 union gameState determineWinner(game, enum player);
+void clrscr(void);
 
 int main(void) {
     enum player currentPlayer = X;
@@ -46,6 +47,7 @@ int main(void) {
 }
 
 void printGame(game _game) {
+    clrscr();
     printf("   |   |   \n");
     printRow(_game, 0);
     printf("   |   |   \n");
@@ -112,4 +114,8 @@ union gameState determineWinner(game _game, enum player currentPlayer) {
     if (numberOfFreeFields == 0)
         state.state = draw;
     return state;
+}
+
+void clrscr(void) {
+    system("@cls||clear");
 }
