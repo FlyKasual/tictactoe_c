@@ -17,6 +17,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define SIZE 9
 #define COLUMNS 3
@@ -38,7 +39,9 @@ void printGame(game);
 void printRow(game, int);
 int getAndValidateUserInput(game);
 union gameState determineWinner(game, enum player);
+void clearInput(void);
 void clrscr(void);
+void getCharacters(char*, size_t);
 
 int main(void) {
     enum player currentPlayer = X;
@@ -49,11 +52,20 @@ int main(void) {
     };
     union gameState state = { ongoing };
 
+    clrscr();
+    printf(
+        "\n\n"
+        " * tictactoe_c  Copyright (C) 2023  Johannes Nielsen\n"
+        " * This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.\n"
+        " * This is free software, and you are welcome to redistribute it\n"
+        " * under certain conditions; type `show c' for details.\n\n"
+    );
     printGame(_game);
     for (;state.state == ongoing; state = determineWinner(_game, currentPlayer), currentPlayer = 1 - currentPlayer) {
         printf("It's %c's turn\n", currentPlayer == X ? 'X' : 'O');
         int choice = getAndValidateUserInput(_game);
         _game[choice] = currentPlayer;
+        clrscr();
         printGame(_game);
     }
     if (state.state == draw)
@@ -65,7 +77,6 @@ int main(void) {
 }
 
 void printGame(game _game) {
-    clrscr();
     printRow(_game, 0);
     printf("–––+–––+–––\n");
     printRow(_game, 3);
@@ -90,13 +101,51 @@ void printRow(game _game, int startingPosition) {
 
 int getAndValidateUserInput(game _game) {
     int _i = 0;
+    int _tmp = -1;
+    char command[7] = "";
     printf("Select position: ");
-    while(scanf("%d", &_i) != 1 || _i < 1 || _i > SIZE || _game[_i - 1] != NONE ) {
-        printf("This is not a valid choice! Please try again: ");
-        int tmp = '\0';
-        while((tmp = getchar()) != '\n' && tmp != EOF);
+    while((_tmp = scanf("%d", &_i)) != 1 || _i < 1 || _i > SIZE || _game[_i - 1] != NONE) {
+        if (_tmp != 1) {
+            getCharacters(command, 6);
+        }
+        if (strcmp(command, "show w") == 0 || strcmp(command, "show c") == 0) {
+            clrscr();
+            switch(command[5]) {
+                case 'w':
+                    printf(
+                        " * tictactoe_c\n"
+                        " * Copyright (C) 2023  Johannes Nielsen\n\n"
+                        " * This program is distributed in the hope that it will be useful,\n"
+                        " * but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+                        " * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+                        " * GNU General Public License for more details.\n"
+                    );
+                    break;
+                case 'c':
+                    printf(
+                        " * tictactoe_c\n"
+                        " * Copyright (C) 2023  Johannes Nielsen\n\n"
+                        " * This program is free software: you can redistribute it and/or modify\n"
+                        " * it under the terms of the GNU General Public License as published by\n"
+                        " * the Free Software Foundation, either version 3 of the License, or\n"
+                        " * (at your option) any later version.\n"
+                    );
+                    break;
+            }
+            clearInput();
+            printGame(_game);
+            return getAndValidateUserInput(_game);
+        } else {
+            printf("This is not a valid choice! Please try again: ");
+            clearInput();
+        }
     }
     return _i - 1;
+}
+
+void clearInput(void) {
+    int tmp = '\0';
+    while((tmp = getchar()) != '\n' && tmp != EOF);
 }
 
 union gameState determineWinner(game _game, enum player currentPlayer) {
@@ -135,4 +184,14 @@ union gameState determineWinner(game _game, enum player currentPlayer) {
 
 void clrscr(void) {
     system("@cls||clear");
+}
+
+
+void getCharacters(char* s, size_t n) {
+    int tmp = '\0';
+    for (size_t i = 0; i < n; ++i) {
+        if ((tmp = getchar()) == '\n' || tmp == EOF)
+            break;
+        s[i] = tmp;
+    }
 }
