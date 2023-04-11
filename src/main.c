@@ -43,25 +43,21 @@ int main(void) {
         printf("It's adraw!\n");
     else
         printf("%c has won!\n", state.winner == X ? 'X' : 'O');
+
     return EXIT_SUCCESS;
 }
 
 void printGame(game _game) {
     clrscr();
-    printf("   |   |   \n");
     printRow(_game, 0);
-    printf("   |   |   \n");
     printf("–––+–––+–––\n");
-    printf("   |   |   \n");
     printRow(_game, 3);
-    printf("   |   |   \n");
     printf("–––+–––+–––\n");
-    printf("   |   |   \n");
     printRow(_game, 6);
-    printf("   |   |   \n");
 }
 
 void printRow(game _game, int startingPosition) {
+    printf("   |   |   \n");
     for (int i = startingPosition; i < (startingPosition + COLUMNS); ++i) {
         if (_game[i] == NONE)
             printf(" %d ", (i + 1));
@@ -72,12 +68,13 @@ void printRow(game _game, int startingPosition) {
         else
             printf("|");
     }
+    printf("   |   |   \n");
 }
 
 int getAndValidateUserInput(game _game) {
     int _i = 0;
     printf("Select position: ");
-    while(scanf("%d", &_i) != 1 || _i < 1 || _i > 9 || _game[_i - 1] != NONE ) {
+    while(scanf("%d", &_i) != 1 || _i < 1 || _i > SIZE || _game[_i - 1] != NONE ) {
         printf("This is not a valid choice! Please try again: ");
         int tmp = '\0';
         while((tmp = getchar()) != '\n' && tmp != EOF);
