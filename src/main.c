@@ -95,8 +95,10 @@ union gameState determineWinner(game _game, enum player currentPlayer) {
             || (_game[0] == currentPlayer && _game[3] == currentPlayer && _game[6] == currentPlayer)    // First column
             || (_game[6] == currentPlayer && _game[7] == currentPlayer && _game[8] == currentPlayer)    // Last row
             || (_game[2] == currentPlayer && _game[5] == currentPlayer && _game[8] == currentPlayer)    // Last column
-        )
+        ) {
             state.winner = currentPlayer;
+            return state;
+        }
         if (_game[4] == currentPlayer) {    // Player has the center
             if (
                 (_game[0] == currentPlayer && _game[8] == currentPlayer)        // Top left to bottom right diagonal
@@ -105,6 +107,7 @@ union gameState determineWinner(game _game, enum player currentPlayer) {
                 || (_game[1] == currentPlayer && _game[7] == currentPlayer)     // center column
             ) {
                 state.winner = currentPlayer;
+                return state;
             }
         }
     }
