@@ -20,6 +20,5 @@ typedef enum player* game;
 void printGame(game);
 int getAndValidateUserInput(game);
 union gameState determineWinner(game, enum player);
-union gameState determineGameStateAfterMove(game, int);
 
 #endif
